@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL: Lesson 1</title>
+    <style>
+        body {
+            margin: 0;
+        }
+        canvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+</body>
+<script id="vertex-source" type="not-javascript">
+    attribute vec4 vertex_points;
+    void main() {
+      gl_Position = vertex_points;
+    }
+</script>
+<script id="fragment-source" type="not-javascript">
+    precision mediump float;
+
+    void main() {
+      gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+</script>
+<script type="text/javascript">
+    const canvas= document.querySelector("#canvas");
+    const gl = canvas.getContext("webgl");
+    if (!gl) {
+        console.log("WebGL unavailable");
+    } else {
+        console.log("WebGL is good to go");
+        const vsSource = document.querySelector("#vertex-source").text;
+        const fsSource = document.querySelector("#fragment-source").text;
+        const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(vertexShader, vsSource);
+        gl.compileShader(vertexShader);
+        const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(fragmentShader, fsSource);
+        gl.compileShader(fragmentShader);
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+
+        const coordinates = [-0.7, 0.7, -0.7, 0, 0.7, 0];
+        const pointsBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, pointsBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coordinates), gl.STATIC_DRAW);
+        const pointsAttributeLocation = gl.getAttribLocation(program, "vertex_points");
+        let size = 2;
+        let type = gl.FLOAT;
+        let normalize = false;
+        let stride = 0;
+        let offset = 0;
+        gl.vertexAttribPointer(pointsAttributeLocation, size, type, normalize, stride, offset);
+        gl.enableVertexAttribArray(pointsAttributeLocation);
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        const mode = gl.TRIANGLES;
+        const first = 0;
+        const count = 3;
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(mode, first, count);
+    }
+</script>
+</html>
